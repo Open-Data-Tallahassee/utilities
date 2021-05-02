@@ -184,6 +184,7 @@
     </div>
     <div id='map' class='map'></div>
     <script>
+
       // This will let you use the .remove() function later on
       if (!('remove' in Element.prototype)) {
         Element.prototype.remove = function() {
@@ -193,10 +194,11 @@
         };
       }
 
+      // mapbox public access token
+      // next iteration: retrieve from .yaml file
       mapboxgl.accessToken = 'pk.eyJ1Ijoic2hlbGJ5LWdyZWVuIiwiYSI6ImNrMHNobWdrNTAwZW8zYnA5czQ5cWh4ankifQ.TWYVyG-n0cmhTGvKg31eow';
-      /**
-       * Add the map to the page
-      */
+     
+      // map, base layer
       var map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/light-v10',
@@ -205,150 +207,24 @@
         scrollZoom: true
       });
 
-      // parcels data layer
-      var parcels = {
-          "type": "FeatureCollection",
-          "features": [
-              {
-      "type": "Feature",
-      "properties": {
-        "_id": "410230  D0030",
-        "SHAPE_AREA": 7500,
-        "SHAPE_LEN": 350,
-        "Lot_Block": "D-0030",
-        "precinct": 1313,
-        "neighborhood": "PROVIDENCE NA"
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -84.30610405831312,
-              30.42659625622673
-            ],
-            [
-              -84.30610378852865,
-              30.426733733120855
-            ],
-            [
-              -84.3061035187434,
-              30.426871210010635
-            ],
-            [
-              -84.30634147861873,
-              30.426871560488557
-            ],
-            [
-              -84.30634174807287,
-              30.426734083598312
-            ],
-            [
-              -84.30634201752625,
-              30.426596606703715
-            ],
-            [
-              -84.30610405831312,
-              30.42659625622673
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "stroke": "#555555",
-        "stroke-width": 2,
-        "stroke-opacity": 1,
-        "fill": "#555555",
-        "fill-opacity": 0.5,
-        "_id": "410230  D0010",
-        "SHAPE_AREA": 8818.51875,
-        "SHAPE_LEN": 385.767778302,
-        "Lot_Block": "D-0010",
-        "precinct": 1313,
-        "neighborhood": "PROVIDENCE NA"
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -84.30586555886977,
-              30.426870859102323
-            ],
-            [
-              -84.3058652887527,
-              30.427008335987185
-            ],
-            [
-              -84.30586497612771,
-              30.4271674469166
-            ],
-            [
-              -84.305864952726,
-              30.42717935722588
-            ],
-            [
-              -84.30586494949269,
-              30.4271810028241
-            ],
-            [
-              -84.30610285851103,
-              30.427207648935806
-            ],
-            [
-              -84.30610288328155,
-              30.427195026496328
-            ],
-            [
-              -84.30610324895741,
-              30.427008686896016
-            ],
-            [
-              -84.30610326290673,
-              30.427001578653723
-            ],
-            [
-              -84.3061035187434,
-              30.426871210010635
-            ],
-            [
-              -84.30586555886977,
-              30.426870859102323
-            ]
-          ]
-        ]
-    }
-    }
-  ]
-};
       
+      // load the map
+      // once it loads...
       /**
-       * Assign a unique id to each store. You'll use this `id`
-       * later to associate each point on the map with a listing
-       * in the sidebar.
-      */
-
-      parcels.features.forEach(function(parcel, i){
-        parcel.properties.id = i;
-      });
-      /**
-       * Wait until the map loads to make changes to the map.
-      */
+       * 1. add a parcels layer
+       * 2. style the parcels layer
+       * 3. move styling to function -- addParcels()
+      **/
       map.on('load', function (e) {
-        /**
-         * This is where your '.addLayer()' used to be, instead
-         * add only the source without styling a layer
-        */
-
+        // parcels layer data
+        // next iteration: just show providence
         map.addSource("parcels", {
           "type": "geojson",
-          "data": "./precinct1313_providence_parcels.geojson",
-        //   parcels
+          "data": "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/adding-parcel-layer/precinct1313_providence_parcels.geojson",
         });
 
+        // parcels layer styling
+        // next iteration: style based on neighborhood
         map.addLayer({
             'id': 'parcels-layer',
                 'source': 'parcels',
@@ -366,7 +242,6 @@
          * - The markers onto the map
         */
         // buildLocationList(stores);
-        // addMarkers();
         // addParcels();
       });
 
