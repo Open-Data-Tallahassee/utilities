@@ -217,23 +217,24 @@
       **/
       map.on('load', function (e) {
         // parcels layer data
-        // next iteration: just show providence
         map.addSource("parcels", {
           "type": "geojson",
           "data": "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/adding-parcel-layer/precinct1313_providence_parcels.geojson",
         });
 
         // parcels layer styling
+        // next iteration: just show providence
         // next iteration: style based on neighborhood
         map.addLayer({
             'id': 'parcels-layer',
-                'source': 'parcels',
-                'type': 'fill',
-                'layout': {},
-                'paint': {
-                    'fill-color': 'brown',
-                    'fill-opacity': 0.3
-                },
+            'source': 'parcels',
+            'type': 'fill',
+            'layout': {},
+            'paint': {
+                'fill-color': 'brown',
+                'fill-opacity': 0.3
+            },
+            'filter': ['==', 'neighborhood', 'PROVIDENCE NA']
         });
 
         /**
