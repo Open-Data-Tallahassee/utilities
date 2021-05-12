@@ -244,17 +244,15 @@
         'type': 'circle',
         'layout': {},
         "paint": {
-            "circle-color": {
-                property: 'PastDue', // colors coded by the 'PastDue' attribute
-                    stops: [
-                        [200, "rgb(253,231,37)"],
-                        [500, "rgb(180,222,44)"],
-                        [1000, "rgb(109,205,89)"],
-                        [5000, "rgb(53,183,121)"],
-                        [10000, "rgb(31,158,137)"],
-                        [12000, "rgb(38,130,142)"],
-                    ]
-                },
+            'circle-color': [
+                'match',
+                ['get', 'LastPaymentYear'],
+                '2021',
+                '#FB3B3B',
+                '2020',
+                '#fbb03b',
+                '#ccc'
+            ],
           'circle-radius': 3
         }
       }, 'waterway-label');
