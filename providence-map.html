@@ -24,7 +24,7 @@
       box-sizing: border-box;
     }
 
-    .sidebar {
+    /* .sidebar {
       position: absolute;
       width: 33.3333%;
       height: 100%;
@@ -32,12 +32,12 @@
       left: 0;
       overflow: hidden;
       border-right: 1px solid rgba(0, 0, 0, 0.25);
-    }
+    } */
 
     .map {
       position: absolute;
-      left: 33.3333%;
-      width: 66.6666%;
+      left: 0%;
+      width: 100%;
       top: 0;
       bottom: 0;
     }
@@ -203,12 +203,12 @@
 </head>
 
 <body>
-  <div class='sidebar'>
+  <!-- <div class='sidebar'>
     <div class='heading'>
       <h1>Our locations</h1>
     </div>
     <div id='listings' class='listings'></div>
-  </div>
+  </div> -->
   <div id='map' class='map'></div>
   <script>
 
@@ -872,25 +872,31 @@
         data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/adding-parcel-layer/precinct1313_providence_parcels.geojson"
       });
 
-      // use expression to join json data with parcels
-      var expression = ["match", ["get", "_id"]];
-
-      canvass.forEach(function (row) {
-        // case 1: canvassed
-        if (row["canvass_date"] !== "NA") {
-          var color = '#9BE117';
-        } else {
-          // case 2: not canvassed, but will be
-          var color = '#E6A308'
-        }
-
-        expression.push(row["_id"], color);
+      // points layer data
+      map.addSource("points", {
+        type: "geojson",
+        data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/pastdue.geojson"
       });
 
-      // Last value is the default, used where there is no data
-      expression.push('#ffffff');
+      // // use expression to join json data with parcels
+      // var expression = ["match", ["get", "_id"]];
 
-      console.log(expression);
+      // canvass.forEach(function (row) {
+      //   // case 1: canvassed
+      //   if (row["canvass_date"] !== "NA") {
+      //     var color = '#9BE117';
+      //   } else {
+      //     // case 2: not canvassed, but will be
+      //     var color = '#E6A308'
+      //   }
+
+      //   expression.push(row["_id"], color);
+      // });
+
+      // // Last value is the default, used where there is no data
+      // expression.push('#ffffff');
+
+      // console.log(expression);
 
       // 04302021 canvassed layer styling
       // map.addLayer({
@@ -904,6 +910,7 @@
       //     'fill-opacity': 0.3
       //   }
       // }, 'waterway-label');
+
 
       // parcels fill layer styling
       // map.addLayer({
@@ -919,14 +926,35 @@
       // }, 'waterway-label');
 
       // parcels line layer styling
+      // map.addLayer({
+      //   'id': 'parcels-layer',
+      //   'source': 'parcels',
+      //   'type': 'line',
+      //   'layout': {},
+      //   'filter': ['==', 'neighborhood', 'PROVIDENCE NA'],
+      //   "paint": {
+      //     "line-color": '#ccc'
+      //   }
+      // }, 'waterway-label');
+
+      // points layer styling
       map.addLayer({
-        'id': 'parcels-layer',
-        'source': 'parcels',
-        'type': 'line',
+        'id': 'points-layer',
+        'source': 'points',
+        'type': 'circle',
         'layout': {},
-        'filter': ['==', 'neighborhood', 'PROVIDENCE NA'],
+        // 'filter': ['==', 'neighborhood', 'PROVIDENCE NA'],
         "paint": {
-          "line-color": '#ccc'
+          'circle-color': [
+            'match',
+            ['get', 'LastPaymentYear'],
+            '2021',
+            '#FB3B3B',
+            '32301',
+            '#fbb03b',
+            '#ccc'
+            ],
+          'circle-radius': 3
         }
       }, 'waterway-label');
     });
