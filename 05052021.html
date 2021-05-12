@@ -234,7 +234,7 @@
         // points layer data
         map.addSource("points", {
             type: "geojson",
-            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/pastdue.geojson"
+            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/pastdue_withdelinquency.geojson"
         });
 
       // points layer styling
@@ -246,11 +246,11 @@
         "paint": {
             'circle-color': [
                 'match',
-                ['get', 'LastPaymentYear'],
-                '2021',
-                '#05D60F', // green is paid recently
+                ['get', 'delinquency'],
+                'jan2021',
+                '#05D60F', // green, haven't paid since january 2021
                 '2020',
-                '#FB3B3B', // red is at risk of being disconnection at any money
+                '#FB3B3B', // red, haven't paid since march 2020
                 '#ccc'
             ],
           'circle-radius': 3
@@ -262,3 +262,7 @@
 </body>
 
 </html>
+
+<!-- who hasn't paid since March 2020? who hasn't paid since the moratorium started? -- 310 ==> red -->
+<!-- who hasn't paid since January 2021? Who are delinquent? -->
+<!-- '#FB3B3B', // red is at risk of being disconnection at any moment -->
