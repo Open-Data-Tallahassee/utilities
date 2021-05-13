@@ -107,7 +107,7 @@
         });
 
         // neighborhoods layer data
-        map.addSource("neighborhoods", {
+        map.addSource("hoods", {
             type: "geojson",
             data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/Neighborhoods.geojson"
         });
@@ -115,7 +115,7 @@
         // parcels layer data
         map.addSource("parcels", {
             type: "geojson",
-            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/parkpoints.geojson"
+            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/parcels.json"
         });
 
       // points layer styling
@@ -148,6 +148,33 @@
       //   "paint": {
       //       'circle-color': 'forestgreen',
       //     'circle-radius': 6
+      //   }
+      // }, 'waterway-label');
+
+      // neighborhoods layer styling
+      map.addLayer({
+        'id': 'hoods-layer',
+        'source': 'hoods',
+        'type': 'line',
+        'layout': {},
+        // 'filter': ['!=', 'delinquency', '0'],
+        "paint": {
+          'line-color': '#666',
+          'line-width': 1
+        }
+      }, 'waterway-label');
+
+      // // parcels layer styling
+      // map.addLayer({
+      //   'id': 'parcels-layer',
+      //   'source': 'parcels',
+      //   'type': 'line',
+      //   'layout': {},
+      //   'minzoom': 14,
+      //   // 'filter': ['!=', 'delinquency', '0'],
+      //   "paint": {
+      //     'line-color': '#ccc',
+      //     'line-width': 1
       //   }
       // }, 'waterway-label');
 
