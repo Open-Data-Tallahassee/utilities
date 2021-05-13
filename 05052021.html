@@ -100,6 +100,24 @@
             data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/pastdue_withdelinquency.geojson"
         });
 
+        // parks layer data
+        map.addSource("parks", {
+            type: "geojson",
+            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/parkpoints.geojson"
+        });
+
+        // neighborhoods layer data
+        map.addSource("neighborhoods", {
+            type: "geojson",
+            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/parkpoints.geojson"
+        });
+
+        // parcels layer data
+        map.addSource("parcels", {
+            type: "geojson",
+            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/parkpoints.geojson"
+        });
+
       // points layer styling
       map.addLayer({
         'id': 'points-layer',
@@ -119,6 +137,19 @@
           'circle-radius': 3
         }
       }, 'waterway-label');
+
+      // parks layer styling
+      // map.addLayer({
+      //   'id': 'parks-layer',
+      //   'source': 'parks',
+      //   'type': 'circle',
+      //   'layout': {},
+      //   // 'filter': ['!=', 'delinquency', '0'],
+      //   "paint": {
+      //       'circle-color': 'forestgreen',
+      //     'circle-radius': 6
+      //   }
+      // }, 'waterway-label');
 
     })
 
