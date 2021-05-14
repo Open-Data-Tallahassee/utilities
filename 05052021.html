@@ -62,6 +62,7 @@
 
   <div id="state-legend" class="legend">
     <h4>As of 5/05, there are 9098 Utility customers with a past due account:</h4>
+    <!-- add show/hide layer box right next to the color -->
     <div><span style="background-color: tomato"></span>4% last made a payment before March 2020, when the utility moratorium began</div>
     <div><span style="background-color: cornflowerblue"></span>28% last made a payment before January 2021</div>
     <div><span style="background-color: lightseagreen"></span>37% last made a payment after March 2021. They're no longer at risk of disconnection</div>
@@ -85,7 +86,7 @@
     // initialize map
     var map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/light-v10',
+      style: 'mapbox://styles/mapbox/dark-v10',
       center: [-84.2808401571308, 30.438425645531353], 
       zoom: 12,
       scrollZoom: true
@@ -117,6 +118,19 @@
             type: "geojson",
             data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/parcels.json"
         });
+
+      // base layer - neighborhoods layer styling
+      map.addLayer({
+        'id': 'hoods-layer',
+        'source': 'hoods',
+        'type': 'fill',
+        'layout': {},
+        // 'filter': ['!=', 'delinquency', '0'],
+        "paint": {
+          'fill-color': '#FD8419',
+          'fill-opacity': 0.5
+        }
+      }, 'waterway-label');
 
       // points layer styling
       map.addLayer({
@@ -151,19 +165,6 @@
       //   }
       // }, 'waterway-label');
 
-      // neighborhoods layer styling
-      map.addLayer({
-        'id': 'hoods-layer',
-        'source': 'hoods',
-        'type': 'line',
-        'layout': {},
-        // 'filter': ['!=', 'delinquency', '0'],
-        "paint": {
-          'line-color': '#666',
-          'line-width': 1
-        }
-      }, 'waterway-label');
-
       // // parcels layer styling
       // map.addLayer({
       //   'id': 'parcels-layer',
@@ -188,7 +189,8 @@
         new mapboxgl.Popup()
         .setLngLat(e.lngLat)
         .setHTML('<b>Payment Date:</b></b> ' + props.LastPaymentMonth + '/' + props.LastPaymentYear + '<br>' +
-        '<b>Payment Amount:</b></b> ' + '$' + props.LastPayAmount)
+        '<b>Payment Amount:</b></b> ' + '$' + props.LastPayAmount +
+        '<b>Address:</b></b> ' + props.Address)
         .addTo(map);
 
     })
