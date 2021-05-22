@@ -119,16 +119,29 @@
             data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/parcels.json"
         });
 
+      // // outline for base layer - neighborhoods layer styling
+      // map.addLayer({
+      //   'id': 'hoods-layer',
+      //   'source': 'hoods',
+      //   'type': 'line',
+      //   'layout': {},
+      //   // 'filter': ['!=', 'delinquency', '0'],
+      //   "paint": {
+      //     'line-color': '#fff',
+      //     // 'line-width': 1
+      //   }
+      // }, 'waterway-label');
+
       // base layer - neighborhoods layer styling
       map.addLayer({
         'id': 'hoods-layer',
         'source': 'hoods',
-        'type': 'fill',
+        'type': 'line',
         'layout': {},
-        // 'filter': ['!=', 'delinquency', '0'],
+        // 'filter': ['==', 'HOA_NAME', 'PROVIDENCE NA', 'LAFAYETTE PARK NA'],
         "paint": {
-          'fill-color': '#FD8419',
-          'fill-opacity': 0.5
+          'line-color': '#FD8419',
+          // 'fill-opacity': 0.5
         }
       }, 'waterway-label');
 
@@ -181,7 +194,7 @@
 
     })
 
-    // click the map
+    // click on the points layer
     map.on('click', 'points-layer', function(e) {
         var acct = map.queryRenderedFeatures(e.point, { layers: ['points-layer'] });
         var props = acct[0].properties;
@@ -191,6 +204,18 @@
         .setHTML('<b>Payment Date:</b></b> ' + props.LastPaymentMonth + '/' + props.LastPaymentYear + '<br>' +
         '<b>Payment Amount:</b></b> ' + '$' + props.LastPayAmount +
         '<b>Address:</b></b> ' + props.Address)
+        .addTo(map);
+
+    })
+
+    // click on the neighborhoods layer
+    map.on('click', 'hoods-layer', function(e) {
+        var acct = map.queryRenderedFeatures(e.point, { layers: ['hoods-layer'] });
+        var props = acct[0].properties;
+
+        new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML('<b>Neighborhood:</b></b> ' + props.HOA_NAME)
         .addTo(map);
 
     })
