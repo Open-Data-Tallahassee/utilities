@@ -63,10 +63,12 @@
   <div id='map' class='map'></div>
 
   <div id="state-legend" class="legend">
-    <h4>Black neighborhoods</h4>
+    <h4>Census Tract % Black, 2019</h4>
     <!-- add show/hide layer box right next to the color -->
-    <div><span style="background-color: tomato"></span>majority-black census tract</div>
-    <div><span style="background-color: cornflowerblue"></span>majority-white</div>
+    <div><span style="background-color: #f6eff7"></span>0-9.9% black</div>
+    <div><span style="background-color: #bdc9e1"></span>10-49.9% black</div>
+    <div><span style="background-color: #67a9cf"></span>50-89.9% black</div>
+    <div><span style="background-color: #02818a"></span>90-100% black</div>
   </div>
 
   <script>
@@ -89,7 +91,7 @@
       container: 'map',
       style: 'mapbox://styles/mapbox/dark-v10',
       center: [-84.2808401571308, 30.438425645531353], 
-      zoom: 12,
+      zoom: 11,
       scrollZoom: true
     });
 
@@ -99,13 +101,13 @@
         // points layer data
         map.addSource("points", {
             type: "geojson",
-            data: ""
+            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/05052021_clean.geojson"
         });
 
         // census tract layer data
         map.addSource("tracts", {
             type: "geojson",
-            data: ""
+            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/censustracts.geojson"
         });
 
         // neighborhoods layer data
@@ -114,32 +116,8 @@
             data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/Neighborhoods.geojson"
         });
 
-      // base layer - neighborhoods layer styling
-      map.addLayer({
-        'id': 'hoods-layer',
-        'source': 'hoods',
-        'type': 'line',
-        'layout': {},
-        "paint": {
-          'line-color': '#FD8419',
-        }
-      }, 'waterway-label');
-
-      // points layer styling
-      map.addLayer({
-        'id': 'points-layer',
-        'source': 'points',
-        'type': 'circle',
-        'layout': {},
-        // 'filter': ['!=', 'delinquency', '0'],
-        "paint": {
-            'circle-color': 'tomato',
-            'circle-radius': 3
-        }
-      }, 'waterway-label');
-
-      // census tract layer styling
-      map.addLayer({
+       // census tract layer styling
+       map.addLayer({
         'id': 'tracts-layer',
         'source': 'tracts',
         'type': 'fill',
@@ -150,10 +128,51 @@
           'fill-color': {
               'property': 'poc_score',
               'stops': [
-                  [0, '#f1f075'],
-                  [51, '#e55e5e']
+                  [0, '#f6eff7'], 
+                  [10, '#bdc9e1'],
+                  [50, '#67a9cf'], 
+                  [90, '#02818a']
                 ]
           },
+          'fill-opacity': 0.75
+        }
+      }, 'waterway-label');
+
+      // parcels layer styling
+      map.addLayer({
+        'id': 'tracts-layer',
+        'source': 'tracts',
+        'type': 'line',
+        'layout': {},
+        'minzoom': 14,
+        // 'filter': ['!=', 'delinquency', '0'],
+        "paint": {
+          'line-color': '#000',
+          // 'fill-opacity': 0.75
+        }
+      }, 'waterway-label');
+
+      // // base layer - neighborhoods layer styling
+      // map.addLayer({
+      //   'id': 'hoods-layer',
+      //   'source': 'hoods',
+      //   'type': 'line',
+      //   'layout': {},
+      //   "paint": {
+      //     'line-color': '#FD8419',
+      //   }
+      // }, 'waterway-label');
+
+      // points layer styling
+      map.addLayer({
+        'id': 'points-layer',
+        'source': 'points',
+        'type': 'circle',
+        'layout': {},
+        // 'filter': ['!=', 'delinquency', '0'],
+        "paint": {
+            'circle-color': 'tomato',
+            'circle-radius': 2,
         }
       }, 'waterway-label');
 
@@ -166,7 +185,7 @@
 
         new mapboxgl.Popup()
         .setLngLat(e.lngLat)
-        .setHTML('<b>' + props.NAMELSAD + '</b>')
+        .setHTML('<b>' + props.NAMELSAD + '</b>' + ' is ' + props.poc_score + "% black")
         .addTo(map);
 
     })
