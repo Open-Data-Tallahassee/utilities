@@ -2,59 +2,15 @@
 
 <head>
   <meta charset='utf-8' />
-  <title>9098 TLH Households Facing Utility Disconnection</title>
+  <title>9098 Tallahassee Utility Customers at risk of Disconnection</title>
   <meta name='robots' content='noindex, nofollow'>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.js'></script>
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.css' rel='stylesheet' />
   <script src="https://d3js.org/d3.v3.min.js"></script>
-  <!-- styling -->
-  <style>
-    body {
-      color: #404040;
-      font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
-      margin: 0;
-      padding: 0;
-      -webkit-font-smoothing: antialiased;
-    }
 
-    .map {
-      position: absolute;
-      left: 0%;
-      width: 100%;
-      top: 0;
-      bottom: 0;
-    }
-
-    .mapboxgl-popup {
-      max-width: 400px;
-      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    }
-
-    .legend {
-      background-color: #fff;
-      border-radius: 3px;
-      bottom: 30px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-      padding: 10px;
-      position: absolute;
-      right: 10px;
-      z-index: 1;
-    }
-
-    .legend h4 {
-      margin: 0 0 10px;
-    }
-
-    .legend div span {
-      border-radius: 2px;
-      display: inline-block;
-      height: 10px;
-      margin-right: 5px;
-      width: 10px;
-    }
-  </style>
+  <!-- import css -->
+  <link rel="stylesheet" href="05052021.css">
 </head>
 
 <body>
@@ -68,159 +24,9 @@
     <div><span style="background-color: lightseagreen"></span>37% last made a payment after March 2021. They're no longer at risk of disconnection</div>
   </div>
 
-  <script>
+  <!-- import js -->
+  <script src="05052021.js"></script>
 
-    // This will let you use the .remove() function later on
-    if (!('remove' in Element.prototype)) {
-      Element.prototype.remove = function () {
-        if (this.parentNode) {
-          this.parentNode.removeChild(this);
-        }
-      };
-    }
-
-    // mapbox public access token
-    // next iteration: retrieve from .yaml file
-    mapboxgl.accessToken = 'pk.eyJ1Ijoic2hlbGJ5LWdyZWVuIiwiYSI6ImNrMHNobWdrNTAwZW8zYnA5czQ5cWh4ankifQ.TWYVyG-n0cmhTGvKg31eow';
-
-    // initialize map
-    var map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/dark-v10',
-      center: [-84.2808401571308, 30.438425645531353], 
-      zoom: 12,
-      scrollZoom: true
-    });
-
-    // load the map
-    map.on('load', function () {
-        
-        // points layer data
-        map.addSource("points", {
-            type: "geojson",
-            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/pastdue_withdelinquency.geojson"
-        });
-
-        // parks layer data
-        map.addSource("parks", {
-            type: "geojson",
-            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/parkpoints.geojson"
-        });
-
-        // neighborhoods layer data
-        map.addSource("hoods", {
-            type: "geojson",
-            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/Neighborhoods.geojson"
-        });
-
-        // parcels layer data
-        map.addSource("parcels", {
-            type: "geojson",
-            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/parcels.json"
-        });
-
-      // // outline for base layer - neighborhoods layer styling
-      // map.addLayer({
-      //   'id': 'hoods-layer',
-      //   'source': 'hoods',
-      //   'type': 'line',
-      //   'layout': {},
-      //   // 'filter': ['!=', 'delinquency', '0'],
-      //   "paint": {
-      //     'line-color': '#fff',
-      //     // 'line-width': 1
-      //   }
-      // }, 'waterway-label');
-
-      // base layer - neighborhoods layer styling
-      map.addLayer({
-        'id': 'hoods-layer',
-        'source': 'hoods',
-        'type': 'line',
-        'layout': {},
-        // 'filter': ['==', 'HOA_NAME', 'PROVIDENCE NA', 'LAFAYETTE PARK NA'],
-        "paint": {
-          'line-color': '#FD8419',
-          // 'fill-opacity': 0.5
-        }
-      }, 'waterway-label');
-
-      // points layer styling
-      map.addLayer({
-        'id': 'points-layer',
-        'source': 'points',
-        'type': 'circle',
-        'layout': {},
-        'filter': ['!=', 'delinquency', '0'],
-        "paint": {
-            'circle-color': [
-                'match',
-                ['get', 'delinquency'],
-                'march2020', 'tomato', // #FB3B3B red, haven't paid since march 2020
-                'jan2021', 'cornflowerblue', // #1988FD, blue, haven't paid since january 2021
-                'march2021', 'lightseagreen', // haven't paid since march 2021 -- at risk
-                '#ccc'
-            ],
-          'circle-radius': 3
-        }
-      }, 'waterway-label');
-
-      // parks layer styling
-      // map.addLayer({
-      //   'id': 'parks-layer',
-      //   'source': 'parks',
-      //   'type': 'circle',
-      //   'layout': {},
-      //   // 'filter': ['!=', 'delinquency', '0'],
-      //   "paint": {
-      //       'circle-color': 'forestgreen',
-      //     'circle-radius': 6
-      //   }
-      // }, 'waterway-label');
-
-      // // parcels layer styling
-      // map.addLayer({
-      //   'id': 'parcels-layer',
-      //   'source': 'parcels',
-      //   'type': 'line',
-      //   'layout': {},
-      //   'minzoom': 14,
-      //   // 'filter': ['!=', 'delinquency', '0'],
-      //   "paint": {
-      //     'line-color': '#ccc',
-      //     'line-width': 1
-      //   }
-      // }, 'waterway-label');
-
-    })
-
-    // click on the points layer
-    map.on('click', 'points-layer', function(e) {
-        var acct = map.queryRenderedFeatures(e.point, { layers: ['points-layer'] });
-        var props = acct[0].properties;
-
-        new mapboxgl.Popup()
-        .setLngLat(e.lngLat)
-        .setHTML('<b>Payment Date:</b></b> ' + props.LastPaymentMonth + '/' + props.LastPaymentYear + '<br>' +
-        '<b>Payment Amount:</b></b> ' + '$' + props.LastPayAmount +
-        '<b>Address:</b></b> ' + props.Address)
-        .addTo(map);
-
-    })
-
-    // click on the neighborhoods layer
-    map.on('click', 'hoods-layer', function(e) {
-        var acct = map.queryRenderedFeatures(e.point, { layers: ['hoods-layer'] });
-        var props = acct[0].properties;
-
-        new mapboxgl.Popup()
-        .setLngLat(e.lngLat)
-        .setHTML('<b>Neighborhood:</b></b> ' + props.HOA_NAME)
-        .addTo(map);
-
-    })
-    
-  </script>
 </body>
 
 </html>
