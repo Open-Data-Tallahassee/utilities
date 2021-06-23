@@ -9,7 +9,7 @@ export const config = {
 
 // sources for the map layers
 export const sources = {
-    places: {
+    points: {
         type: 'geojson',
         data: 'https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/data/disconnected_05242021.geojson',
     },
@@ -23,6 +23,13 @@ export const layers = [
       type: 'circle',
       paint: {
         'circle-color': 'orange',
+        'circle-radius': {
+            'base': 1.75,
+            'stops': [
+                [12, 2],
+                [22, 180]
+            ]
+        },
         // 'circle-outline-color': 'white'
       },
       layout: {
