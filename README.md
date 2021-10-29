@@ -1,2 +1,2 @@
-# utility-moratorium
-materials for neighborhood organizing for the TLH utility moratorium campaign
+# utilities
+tracking City of Tallahassee utilities, focusing on utility rates, bills, and energy efficiency
