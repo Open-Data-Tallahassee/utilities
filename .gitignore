@@ -2,3 +2,4 @@
 *map/package-lock.json
 *map/.cache
 .DS_Store
+data/raw
