@@ -59,7 +59,7 @@ const Map = () => {
             style: `mapbox://styles/mapbox/light-v10`,
             center: [-84.28, 30.44],
             zoom: 11, 
-            minZoom: 2
+            minZoom: 5
         })
 
         mapRef.current = map

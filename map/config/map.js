@@ -3,7 +3,7 @@
 // initial conditions
 export const config = {
     accessToken: "pk.eyJ1IjoicGFzaWgiLCJhIjoiY2pybzJqdTVjMHJzeDQ0bW80aGdzaXV3ayJ9.yxD8Nqu7FLnf8-lBo7F1zQ",
-    minZoom: 2,
+    minZoom: 5,
     padding: 0.1
 }
 
@@ -11,7 +11,7 @@ export const config = {
 export const sources = {
     points: {
         type: 'geojson',
-        data: 'https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/data/disconnected_05242021.geojson',
+        data: 'https://raw.githubusercontent.com/Open-Data-Tallahassee/utilities/dev/data/disconnected_09242021.geojson',
     },
 }
 
@@ -22,7 +22,7 @@ export const layers = [
       source: 'points',
       type: 'circle',
       paint: {
-        'circle-color': 'orange',
+        'circle-color': 'black',
         'circle-radius': {
             'base': 1.75,
             'stops': [
