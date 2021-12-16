@@ -1,0 +1,208 @@
+<!-- PAST DUE UTILITY DATA, W/ CENSUS TRACTS -->
+
+<html>
+
+<head>
+  <meta charset='utf-8' />
+  <title>Who is behind on their utility bill?</title>
+  <meta name='robots' content='noindex, nofollow'>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.css' rel='stylesheet' />
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <!-- styling -->
+  <style>
+    body {
+      color: #404040;
+      font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .map {
+      position: absolute;
+      left: 0%;
+      width: 100%;
+      top: 0;
+      bottom: 0;
+    }
+
+    .mapboxgl-popup {
+      max-width: 400px;
+      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    }
+
+    .legend {
+      background-color: #fff;
+      border-radius: 3px;
+      bottom: 30px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      padding: 10px;
+      position: absolute;
+      right: 10px;
+      z-index: 1;
+    }
+
+    .legend h4 {
+      margin: 0 0 10px;
+    }
+
+    .legend div span {
+      border-radius: 2px;
+      display: inline-block;
+      height: 10px;
+      margin-right: 5px;
+      width: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id='map' class='map'></div>
+
+  <div id="state-legend" class="legend">
+    <h4>Census Tract % Black, 2019</h4>
+    <!-- add show/hide layer box right next to the color -->
+    <div><span style="background-color: #f6eff7"></span>0-9.9% black</div>
+    <div><span style="background-color: #bdc9e1"></span>10-49.9% black</div>
+    <div><span style="background-color: #67a9cf"></span>50-89.9% black</div>
+    <div><span style="background-color: #02818a"></span>90-100% black</div>
+  </div>
+
+  <script>
+
+    // This will let you use the .remove() function later on
+    if (!('remove' in Element.prototype)) {
+      Element.prototype.remove = function () {
+        if (this.parentNode) {
+          this.parentNode.removeChild(this);
+        }
+      };
+    }
+
+    // mapbox public access token
+    // next iteration: retrieve from .yaml file
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic2hlbGJ5LWdyZWVuIiwiYSI6ImNrMHNobWdrNTAwZW8zYnA5czQ5cWh4ankifQ.TWYVyG-n0cmhTGvKg31eow';
+
+    // initialize map
+    var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/dark-v10',
+      center: [-84.2808401571308, 30.438425645531353], 
+      zoom: 11,
+      scrollZoom: true
+    });
+
+    // load the map
+    map.on('load', function () {
+        
+        // points layer data
+        map.addSource("points", {
+            type: "geojson",
+            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/05052021_clean.geojson"
+        });
+
+        // census tract layer data
+        map.addSource("tracts", {
+            type: "geojson",
+            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/censustracts.geojson"
+        });
+
+        // neighborhoods layer data
+        map.addSource("hoods", {
+            type: "geojson",
+            data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/Neighborhoods.geojson"
+        });
+
+       // census tract layer styling
+       map.addLayer({
+        'id': 'tracts-layer',
+        'source': 'tracts',
+        'type': 'fill',
+        'layout': {},
+        // 'minzoom': 14,
+        // 'filter': ['!=', 'delinquency', '0'],
+        "paint": {
+          'fill-color': {
+              'property': 'poc_score',
+              'stops': [
+                  [0, '#f6eff7'], 
+                  [10, '#bdc9e1'],
+                  [50, '#67a9cf'], 
+                  [90, '#02818a']
+                ]
+          },
+          'fill-opacity': 0.75
+        }
+      }, 'waterway-label');
+
+      // parcels layer styling
+      map.addLayer({
+        'id': 'tracts-layer',
+        'source': 'tracts',
+        'type': 'line',
+        'layout': {},
+        'minzoom': 14,
+        // 'filter': ['!=', 'delinquency', '0'],
+        "paint": {
+          'line-color': '#000',
+          // 'fill-opacity': 0.75
+        }
+      }, 'waterway-label');
+
+      // // base layer - neighborhoods layer styling
+      // map.addLayer({
+      //   'id': 'hoods-layer',
+      //   'source': 'hoods',
+      //   'type': 'line',
+      //   'layout': {},
+      //   "paint": {
+      //     'line-color': '#FD8419',
+      //   }
+      // }, 'waterway-label');
+
+      // points layer styling
+      map.addLayer({
+        'id': 'points-layer',
+        'source': 'points',
+        'type': 'circle',
+        'layout': {},
+        // 'filter': ['!=', 'delinquency', '0'],
+        "paint": {
+            'circle-color': 'tomato',
+            'circle-radius': 2,
+        }
+      }, 'waterway-label');
+
+    })
+
+    // click on the tracts layer
+    map.on('click', 'tracts-layer', function(e) {
+        var tract = map.queryRenderedFeatures(e.point, { layers: ['tracts-layer'] });
+        var props = tract[0].properties;
+
+        new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML('<b>Census Tract ' + props.NAME10 + '</b>' + ' is ' + props.poc_score + "% black")
+        .addTo(map);
+
+    })
+
+    // click on the neighborhoods layer
+    map.on('click', 'hoods-layer', function(e) {
+        var acct = map.queryRenderedFeatures(e.point, { layers: ['hoods-layer'] });
+        var props = acct[0].properties;
+
+        new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML('<b>Neighborhood:</b></b> ' + props.HOA_NAME)
+        .addTo(map);
+
+    })
+    
+  </script>
+</body>
+
+</html>

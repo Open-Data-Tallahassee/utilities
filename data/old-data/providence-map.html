@@ -1,0 +1,1151 @@
+<html>
+
+<head>
+  <meta charset='utf-8' />
+  <title>Providence Canvassing Progress</title>
+  <meta name='robots' content='noindex, nofollow'>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.css' rel='stylesheet' />
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <!-- styling -->
+  <style>
+    body {
+      color: #404040;
+      font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    * {
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+    }
+
+    /* .sidebar {
+      position: absolute;
+      width: 33.3333%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      overflow: hidden;
+      border-right: 1px solid rgba(0, 0, 0, 0.25);
+    } */
+
+    .map {
+      position: absolute;
+      left: 0%;
+      width: 100%;
+      top: 0;
+      bottom: 0;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin: 0;
+      font-weight: 400;
+      line-height: 20px;
+      padding: 20px 2px;
+    }
+
+    a {
+      color: #404040;
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: #101010;
+    }
+
+    .heading {
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      min-height: 60px;
+      line-height: 60px;
+      padding: 0 10px;
+      background-color: #00853e;
+      color: #fff;
+    }
+
+    .listings {
+      height: 100%;
+      overflow: auto;
+      padding-bottom: 60px;
+    }
+
+    .listings .item {
+      display: block;
+      border-bottom: 1px solid #eee;
+      padding: 10px;
+      text-decoration: none;
+    }
+
+    .listings .item:last-child {
+      border-bottom: none;
+    }
+
+    .listings .item .title {
+      display: block;
+      color: #00853e;
+      font-weight: 700;
+    }
+
+    .listings .item .title small {
+      font-weight: 400;
+    }
+
+    .listings .item.active .title,
+    .listings .item .title:hover {
+      color: #8cc63f;
+    }
+
+    .listings .item.active {
+      background-color: #f8f8f8;
+    }
+
+    ::-webkit-scrollbar {
+      width: 3px;
+      height: 3px;
+      border-left: 0;
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    ::-webkit-scrollbar-track {
+      background: none;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #00853e;
+      border-radius: 0;
+    }
+
+    .marker {
+      height: 25px;
+      width: 25px;
+      background-color: #bbb;
+      border-radius: 50%;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .marker.active {
+      background-color: #000;
+    }
+
+
+    .clearfix {
+      display: block;
+    }
+
+    .clearfix:after {
+      content: '.';
+      display: block;
+      height: 0;
+      clear: both;
+      visibility: hidden;
+    }
+
+    /* Marker tweaks */
+    .mapboxgl-popup {
+      padding-bottom: 50px;
+    }
+
+    .mapboxgl-popup-close-button {
+      display: none;
+    }
+
+    .mapboxgl-popup-content {
+      font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+      padding: 0;
+      width: 180px;
+    }
+
+    .mapboxgl-popup-content-wrapper {
+      padding: 1%;
+    }
+
+    .mapboxgl-popup-content h3 {
+      background: #91c949;
+      color: #fff;
+      margin: 0;
+      display: block;
+      padding: 10px;
+      border-radius: 3px 3px 0 0;
+      font-weight: 700;
+      margin-top: -15px;
+    }
+
+    .mapboxgl-popup-content h4 {
+      margin: 0;
+      display: block;
+      padding: 10px 10px 10px 10px;
+      font-weight: 400;
+    }
+
+    .mapboxgl-popup-content div {
+      padding: 10px;
+    }
+
+    .mapboxgl-container .leaflet-marker-icon {
+      cursor: pointer;
+    }
+
+    .mapboxgl-popup-anchor-top>.mapboxgl-popup-content {
+      margin-top: 15px;
+    }
+
+    .mapboxgl-popup-anchor-top>.mapboxgl-popup-tip {
+      border-bottom-color: #91c949;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- <div class='sidebar'>
+    <div class='heading'>
+      <h1>Our locations</h1>
+    </div>
+    <div id='listings' class='listings'></div>
+  </div> -->
+  <div id='map' class='map'></div>
+  <script>
+
+    // This will let you use the .remove() function later on
+    if (!('remove' in Element.prototype)) {
+      Element.prototype.remove = function () {
+        if (this.parentNode) {
+          this.parentNode.removeChild(this);
+        }
+      };
+    }
+
+    // mapbox public access token
+    // next iteration: retrieve from .yaml file
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic2hlbGJ5LWdyZWVuIiwiYSI6ImNrMHNobWdrNTAwZW8zYnA5czQ5cWh4ankifQ.TWYVyG-n0cmhTGvKg31eow';
+
+    // initialize map
+    var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v10',
+      center: [-84.30683659362369, 30.424444263075184],
+      zoom: 14,
+      scrollZoom: true
+    });
+
+    // canvass data
+    var canvass = [{
+        "_id": "410270  A0180",
+        "Short_Address": "1226 Hutchinson St",
+        "Unit": "NA",
+        "AccountBalance": 2313.93,
+        "PastDueAmount": 1945.95,
+        "LastInvoiceAmount": 367.98,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  I0090",
+        "Short_Address": "1228 McCaskill Ave",
+        "Unit": "NA",
+        "AccountBalance": 3494.21,
+        "PastDueAmount": 3273.49,
+        "LastInvoiceAmount": 220.72,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  L0050",
+        "Short_Address": "1235 McCaskill Ave",
+        "Unit": "NA",
+        "AccountBalance": 2838.84,
+        "PastDueAmount": 2611.27,
+        "LastInvoiceAmount": 227.57,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410270  B0030",
+        "Short_Address": "1309 Hutchinson St",
+        "Unit": "NA",
+        "AccountBalance": 4321.33,
+        "PastDueAmount": 3975.79,
+        "LastInvoiceAmount": 345.54,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "4102330000040",
+        "Short_Address": "1313 Lake Ave",
+        "Unit": "Unit 1",
+        "AccountBalance": 2989.43,
+        "PastDueAmount": 2637.24,
+        "LastInvoiceAmount": 352.19,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "4102330000030",
+        "Short_Address": "1313 Lake Ave",
+        "Unit": "Unit B",
+        "AccountBalance": 2525.27,
+        "PastDueAmount": 2286.59,
+        "LastInvoiceAmount": 238.68,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  M0050",
+        "Short_Address": "1321 McCaskill Ave",
+        "Unit": "NA",
+        "AccountBalance": 2651.4,
+        "PastDueAmount": 2448.47,
+        "LastInvoiceAmount": 202.93,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410270  B0110",
+        "Short_Address": "1341 Hutchinson St",
+        "Unit": "NA",
+        "AccountBalance": 3459.51,
+        "PastDueAmount": 3059.06,
+        "LastInvoiceAmount": 400.45,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  P0072",
+        "Short_Address": "1511 Lake Ave",
+        "Unit": "NA",
+        "AccountBalance": 2608.57,
+        "PastDueAmount": 2142.62,
+        "LastInvoiceAmount": 465.95,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "41023507H0000",
+        "Short_Address": "1514 Lake Ave",
+        "Unit": "NA",
+        "AccountBalance": 4413.74,
+        "PastDueAmount": 3802.16,
+        "LastInvoiceAmount": 611.58,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "41023507C0000",
+        "Short_Address": "1525 McCaskill Ave",
+        "Unit": "Apt 1",
+        "AccountBalance": 2475.01,
+        "PastDueAmount": 2337.7,
+        "LastInvoiceAmount": 137.31,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "4102060000050",
+        "Short_Address": "1529 Lake Ave",
+        "Unit": "NA",
+        "AccountBalance": 2470.19,
+        "PastDueAmount": 2265.75,
+        "LastInvoiceAmount": 204.44,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "4102020000040",
+        "Short_Address": "1550 Levy Ave",
+        "Unit": "NA",
+        "AccountBalance": 3037.08,
+        "PastDueAmount": 2818.32,
+        "LastInvoiceAmount": 218.76,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  P0083",
+        "Short_Address": "1601 Lake Ave",
+        "Unit": "NA",
+        "AccountBalance": 3596.91,
+        "PastDueAmount": 3254.99,
+        "LastInvoiceAmount": 341.92,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  E0062",
+        "Short_Address": "1602 Stuckey Ave",
+        "Unit": "Apt 2114",
+        "AccountBalance": 2308.55,
+        "PastDueAmount": 2157.04,
+        "LastInvoiceAmount": 151.51,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  O0082",
+        "Short_Address": "1607 McCaskill Ave",
+        "Unit": "Apt 6",
+        "AccountBalance": 2700.29,
+        "PastDueAmount": 2598.76,
+        "LastInvoiceAmount": 101.53,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  P0088 10D",
+        "Short_Address": "1619 Lake Ave",
+        "Unit": "Apt 10D",
+        "AccountBalance": 3212.33,
+        "PastDueAmount": 2952.49,
+        "LastInvoiceAmount": 259.84,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  P0088 4C",
+        "Short_Address": "1619 Lake Ave",
+        "Unit": "Apt 4C",
+        "AccountBalance": 2398.56,
+        "PastDueAmount": 2217.81,
+        "LastInvoiceAmount": 180.75,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "4102750000070",
+        "Short_Address": "1635 McCaskill Ave",
+        "Unit": "NA",
+        "AccountBalance": 2879.59,
+        "PastDueAmount": 2606.07,
+        "LastInvoiceAmount": 273.52,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  E0080",
+        "Short_Address": "1698 Stuckey Ave",
+        "Unit": "Apt 13",
+        "AccountBalance": 2396.69,
+        "PastDueAmount": 2173.54,
+        "LastInvoiceAmount": 223.15,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410230  O0010",
+        "Short_Address": "1802 Highland St",
+        "Unit": "NA",
+        "AccountBalance": 2977.63,
+        "PastDueAmount": 2769.15,
+        "LastInvoiceAmount": 208.48,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410280  B0160",
+        "Short_Address": "2008 Warwick St",
+        "Unit": "NA",
+        "AccountBalance": 4176.81,
+        "PastDueAmount": 3913.9,
+        "LastInvoiceAmount": 262.91,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410280  C0140",
+        "Short_Address": "2013 Warwick St",
+        "Unit": "NA",
+        "AccountBalance": 3345.21,
+        "PastDueAmount": 3101.51,
+        "LastInvoiceAmount": 243.7,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410270  D0330",
+        "Short_Address": "2015 Hillsborough St",
+        "Unit": "NA",
+        "AccountBalance": 2449.81,
+        "PastDueAmount": 2211.96,
+        "LastInvoiceAmount": 237.85,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "Knocked. No answer. ",
+        "canvass_date": "04/30/2021"
+    },
+    {
+        "_id": "410270  D0050",
+        "Short_Address": "2016 Holmes St",
+        "Unit": "NA",
+        "AccountBalance": 2473.93,
+        "PastDueAmount": 2047.98,
+        "LastInvoiceAmount": 425.95,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410270  D0330 1",
+        "Short_Address": "2017 Hillsborough St",
+        "Unit": "NA",
+        "AccountBalance": 2519.35,
+        "PastDueAmount": 2300.01,
+        "LastInvoiceAmount": 219.34,
+        "account_type": "past due",
+        "applied_for_CARES": "no, because the account holder is incarcerated",
+        "applied_for_ProjectShare": "didn't ask",
+        "setup_payment_plan": "has made two recent payments: $500 and $400",
+        "received_extension": "unclear of potential disconnect date",
+        "received_notice": "yes, one, but it stopped after making payments",
+        "contact_name": "Kenyetta Sanders",
+        "contact_number": "need",
+        "appointment": "05/05/2021, 6:30pm",
+        "notes": "Landlord working with her on rent -- does she know about the eviction moratorium?",
+        "canvass_date": "04/30/2021"
+    },
+    {
+        "_id": "410270  D0330 A",
+        "Short_Address": "2019 Hillsborough St",
+        "Unit": "Unit A",
+        "AccountBalance": 3306.59,
+        "PastDueAmount": 2962.08,
+        "LastInvoiceAmount": 344.51,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "no",
+        "notes": "Not home. Left card. ",
+        "canvass_date": "04/30/2021"
+    },
+    {
+        "_id": "410270  D0320",
+        "Short_Address": "2021 Hillsborough St",
+        "Unit": "NA",
+        "AccountBalance": 2157.13,
+        "PastDueAmount": 1855.63,
+        "LastInvoiceAmount": 301.5,
+        "account_type": "past due",
+        "applied_for_CARES": "didn't ask",
+        "applied_for_ProjectShare": "didn't ask",
+        "setup_payment_plan": "didn't ask",
+        "received_extension": "didn't ask",
+        "received_notice": "yes, door hanger",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "no",
+        "notes": "Aware of the situation. Not interested. Handling it. ",
+        "canvass_date": "04/30/2021"
+    },
+    {
+        "_id": "410270  C0070",
+        "Short_Address": "2028 Hillsborough St",
+        "Unit": "NA",
+        "AccountBalance": 2983.1,
+        "PastDueAmount": 2764.26,
+        "LastInvoiceAmount": 218.84,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "no",
+        "notes": "Not home.",
+        "canvass_date": "04/30/2021"
+    },
+    {
+        "_id": "410280  C0080",
+        "Short_Address": "2037 Warwick St",
+        "Unit": "NA",
+        "AccountBalance": 5055.33,
+        "PastDueAmount": 2853.68,
+        "LastInvoiceAmount": 2201.65,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "NA",
+        "notes": "NA",
+        "canvass_date": "NA"
+    },
+    {
+        "_id": "410270  D0210",
+        "Short_Address": "2063 Hillsborough St",
+        "Unit": "NA",
+        "AccountBalance": 2920.66,
+        "PastDueAmount": 2321.59,
+        "LastInvoiceAmount": 599.07,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "NA",
+        "contact_number": "NA",
+        "appointment": "no",
+        "notes": "Not home. Gave lit to son. ",
+        "canvass_date": "04/30/2021"
+    },
+    {
+        "_id": "410270  D0200",
+        "Short_Address": "2067 Hillsborough St",
+        "Unit": "NA",
+        "AccountBalance": 2397.2,
+        "PastDueAmount": 2217.91,
+        "LastInvoiceAmount": 179.29,
+        "account_type": "past due",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "Alton Carter",
+        "contact_number": "850-841-0194",
+        "appointment": "05/06/2021, 6pm",
+        "notes": "Wants financial information on housing. Covered for utilities due to disability.",
+        "canvass_date": "04/30/2021"
+    },
+    {
+        "_id": "NA",
+        "Short_Address": "NA",
+        "Unit": "NA",
+        "AccountBalance": "NA",
+        "PastDueAmount": "NA",
+        "LastInvoiceAmount": "NA",
+        "account_type": "NA",
+        "applied_for_CARES": "NA",
+        "applied_for_ProjectShare": "NA",
+        "setup_payment_plan": "NA",
+        "received_extension": "NA",
+        "received_notice": "NA",
+        "contact_name": "Nicole Jones",
+        "contact_number": "850-755-7891",
+        "appointment": "05/02/2021, 5:30pm",
+        "notes": "Wants housing assistance. In an abusive relationship and wants to be independent, in her own environment. Doesn't live in Providence but was hanging out with a group on guys on Hillsborough.",
+        "canvass_date": "04/30/2021"
+    }]
+
+    // load the map
+    map.on('load', function () {
+
+      // parcels layer data
+      map.addSource("parcels", {
+        type: "geojson",
+        data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/adding-parcel-layer/precinct1313_providence_parcels.geojson"
+      });
+
+      // points layer data
+      map.addSource("points", {
+        type: "geojson",
+        data: "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/main/pastdue.geojson"
+      });
+
+      // // use expression to join json data with parcels
+      // var expression = ["match", ["get", "_id"]];
+
+      // canvass.forEach(function (row) {
+      //   // case 1: canvassed
+      //   if (row["canvass_date"] !== "NA") {
+      //     var color = '#9BE117';
+      //   } else {
+      //     // case 2: not canvassed, but will be
+      //     var color = '#E6A308'
+      //   }
+
+      //   expression.push(row["_id"], color);
+      // });
+
+      // // Last value is the default, used where there is no data
+      // expression.push('#ffffff');
+
+      // console.log(expression);
+
+      // 04302021 canvassed layer styling
+      // map.addLayer({
+      //   'id': '04302021-layer',
+      //   'source': 'parcels',
+      //   'type': 'fill',
+      //   'layout': {},
+      //   'filter': ['==', 'neighborhood', 'PROVIDENCE NA'],
+      //   "paint": {
+      //     "fill-color": expression,
+      //     'fill-opacity': 0.3
+      //   }
+      // }, 'waterway-label');
+
+
+      // parcels fill layer styling
+      // map.addLayer({
+      //     'id': 'parcels-layer',
+      //     'source': 'parcels',
+      //     'type': 'fill',
+      //     'layout': {},
+      //     'filter': ['==', 'neighborhood', 'PROVIDENCE NA'],
+      //     "paint": {
+      //         "fill-color": '#000',
+      //         'fill-opacity': 0.3
+      //     }
+      // }, 'waterway-label');
+
+      // parcels line layer styling
+      // map.addLayer({
+      //   'id': 'parcels-layer',
+      //   'source': 'parcels',
+      //   'type': 'line',
+      //   'layout': {},
+      //   'filter': ['==', 'neighborhood', 'PROVIDENCE NA'],
+      //   "paint": {
+      //     "line-color": '#ccc'
+      //   }
+      // }, 'waterway-label');
+
+      // points layer styling
+      map.addLayer({
+        'id': 'points-layer',
+        'source': 'points',
+        'type': 'circle',
+        'layout': {},
+        // 'filter': ['==', 'neighborhood', 'PROVIDENCE NA'],
+        "paint": {
+          'circle-color': [
+            'match',
+            ['get', 'LastPaymentYear'],
+            '2021',
+            '#FB3B3B',
+            '32301',
+            '#fbb03b',
+            '#ccc'
+            ],
+          'circle-radius': 3
+        }
+      }, 'waterway-label');
+    });
+
+
+
+
+    //     // parcels layer data
+    //     map.addSource("parcels", {
+    //       "type": "geojson",
+    //       // json for canvassing pastdue + delinquent
+    //       // TODO: STOPPING POINT: upload layer with tax information
+    //       // next iter: upload layer with voter information in precinct 1313
+    //       "data": "https://raw.githubusercontent.com/shelbygreen/utility-moratorium/adding-parcel-layer/precinct1313_providence_parcels.geojson",
+    //     });
+
+    //     // parcels layer styling
+    //     // next iteration: style based on account information
+    //     map.addLayer({
+    //         'id': 'parcels-layer',
+    //         'source': 'parcels',
+    //         'type': 'fill',
+    //         'layout': {},
+    //         'paint': {
+    //             'fill-color': 'brown',
+    //             'fill-opacity': 0.3
+    //         },
+    //         'filter': ['==', 'neighborhood', 'PROVIDENCE NA']
+    //     });
+
+    //     /**
+    //      * Add all the things to the page:
+    //      * - The location listings on the side of the page
+    //      * - The markers onto the map
+    //     */
+    //     // buildLocationList(stores);
+    //     // addParcels();
+    //   });
+
+    /**
+     * Add a parcel to the map for every account.
+     * **/
+    //   function addParcels() {
+    //       parcels.features.forEach(function(parcel) {
+    //           var el = document.createElement('div');
+    //           el.id = "parcel-" + parcel.properties.id;
+    //           el.className = 'fill'
+    //       })
+    //   }
+
+    /**
+     * Add a marker to the map for every store listing.
+    **/
+    //   function addMarkers() {
+    //     /* For each feature in the GeoJSON object above: */
+    //     stores.features.forEach(function(marker) {
+    //       /* Create a div element for the marker. */
+    //       var el = document.createElement('div');
+    //       /* Assign a unique `id` to the marker. */
+    //       el.id = "marker-" + marker.properties.id;
+    //       /* Assign the `marker` class to each marker for styling. */
+    //       el.className = 'marker';
+
+    //       /**
+    //        * Create a marker using the div element
+    //        * defined above and add it to the map.
+    //       **/
+    //       new mapboxgl.Marker(el, { offset: [0, -23] })
+    //         .setLngLat(marker.geometry.coordinates)
+    //         .addTo(map);
+
+    //       /**
+    //        * Listen to the element and when it is clicked, do three things:
+    //        * 1. Fly to the point
+    //        * 2. Close all other popups and display popup for clicked store
+    //        * 3. Highlight listing in sidebar (and remove highlight for all other listings)
+    //       **/
+
+    //       el.addEventListener('mousemove', function(e){
+    //         /* Highlight listing in sidebar */
+    //         var activeItem = document.getElementsByClassName('active');
+    //         e.stopPropagation();
+    //         if (activeItem[0]) {
+    //           activeItem[0].classList.remove('active');
+    //         }
+    //         var listing = document.getElementById('listing-' + marker.properties.id);
+    //         listing.classList.add('active');
+    //         var markerDot = document.getElementById('marker-' + marker.properties.id);
+    //         markerDot.classlist.add('active');
+
+    //       });
+
+
+    //       el.addEventListener('click', function(e){
+    //         /* Fly to the point */
+    //         flyToStore(marker);
+    //         /* Close all other popups and display popup for clicked store */
+    //         createPopUp(marker);
+    //         /* Highlight listing in sidebar */
+    //         var activeItem = document.getElementsByClassName('active');
+    //         e.stopPropagation();
+    //         if (activeItem[0]) {
+    //           activeItem[0].classList.remove('active');
+    //         }
+    //         var listing = document.getElementById('listing-' + marker.properties.id);
+    //         listing.classList.add('active');
+    //       });
+    //     });
+    //   }
+
+    //   /**
+    //    * Add a listing for each store to the sidebar.
+    //   **/
+    //   function buildLocationList(data) {
+    //     data.features.forEach(function(store, i){
+    //       /**
+    //        * Create a shortcut for `store.properties`,
+    //        * which will be used several times below.
+    //       **/
+    //       var prop = store.properties;
+
+    //       /* Add a new listing section to the sidebar. */
+    //       var listings = document.getElementById('listings');
+    //       var listing = listings.appendChild(document.createElement('div'));
+    //       /* Assign a unique `id` to the listing. */
+    //       listing.id = "listing-" + prop.id;
+    //       /* Assign the `item` class to each listing for styling. */
+    //       listing.className = 'item';
+
+    //       /* Add the link to the individual listing created above. */
+    //       var link = listing.appendChild(document.createElement('a'));
+    //       link.href = '#';
+    //       link.className = 'title';
+    //       link.id = "link-" + prop.id;
+    //       link.innerHTML = prop.address;
+
+    //       /* Add details to the individual listing. */
+    //       var details = listing.appendChild(document.createElement('div'));
+    //       details.innerHTML = prop.city;
+    //       if (prop.phone) {
+    //         details.innerHTML += ' · ' + prop.phoneFormatted;
+    //       }
+
+    //       /**
+    //        * Listen to the element and when it is clicked, do four things:
+    //        * 1. Update the `currentFeature` to the store associated with the clicked link
+    //        * 2. Fly to the point
+    //        * 3. Close all other popups and display popup for clicked store
+    //        * 4. Highlight listing in sidebar (and remove highlight for all other listings)
+    //       **/
+    //       link.addEventListener('click', function(e){
+    //         for (var i=0; i < data.features.length; i++) {
+    //           if (this.id === "link-" + data.features[i].properties.id) {
+    //             var clickedListing = data.features[i];
+    //             flyToStore(clickedListing);
+    //             createPopUp(clickedListing);
+    //           }
+    //         }
+    //         var activeItem = document.getElementsByClassName('active');
+    //         if (activeItem[0]) {
+    //           activeItem[0].classList.remove('active');
+    //         }
+    //         this.parentNode.classList.add('active');
+    //       });
+    //     });
+    //   }
+
+    //   /**
+    //    * Use Mapbox GL JS's `flyTo` to move the camera smoothly
+    //    * a given center point.
+    //   **/
+    //   function flyToStore(currentFeature) {
+    //     map.flyTo({
+    //       center: currentFeature.geometry.coordinates,
+    //       zoom: 15
+    //     });
+    //   }
+
+    //   /**
+    //    * Create a Mapbox GL JS `Popup`.
+    //   **/
+    //   function createPopUp(currentFeature) {
+    //     var popUps = document.getElementsByClassName('mapboxgl-popup');
+    //     if (popUps[0]) popUps[0].remove();
+    //     var popup = new mapboxgl.Popup({closeOnClick: false})
+    //       .setLngLat(currentFeature.geometry.coordinates)
+    //       .setHTML('<h3>Sweetgreen</h3>' +
+    //         '<h4>' + currentFeature.properties.address + '</h4>')
+    //       .addTo(map);
+    //   }
+  </script>
+</body>
+
+</html>
