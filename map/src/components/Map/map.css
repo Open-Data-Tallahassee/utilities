@@ -1,0 +1,113 @@
+.wrapper {
+    /* display: flex; */
+    flex-flow: row nowrap;
+    font-family: 'Lato', sans-serif;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+/* tell all items to be 100% width, via flex-basis */
+.wrapper > * {
+    width: 100%;
+}
+
+.title {
+    font-size: 18px;
+    /* display: flex; */
+    /* flex-flow: column nowrap; */
+    margin-bottom: 20px;
+    /* justify-content: space-evenly;
+    align-items: flex-end; */
+}
+
+.title-text {
+    font-weight: bold;
+    font-size: 24px;
+    color: #076448;
+    text-align: center;
+    /* display: flex; */
+    /* margin-bottom: 20px; */
+}
+
+.hidden {
+    display: none;
+}
+
+.map {
+    height: 80vh;
+    width: 100vw;
+}
+
+.floating-card {
+    margin-top: 20px;
+    text-align: center;
+    color: #000000;
+    font-weight: bold;
+}
+
+legend {
+    /* width: 100vw; */
+	padding: 10px;
+    background: white;
+    font-size: 16px;
+    font-family: 'Lato', sans-serif;
+    position: absolute;
+}
+
+.legend-labels {
+    display: flex;
+    width:120%;
+}
+
+.legend-labels div {
+    text-align: center;
+    font-size: 80%;
+	width: calc(100% / 7);
+}
+
+.legend-labels div span {
+	display: block;
+	height: 15px;
+}
+
+.legend-source {
+	font-size: 70%;
+	color: #999;
+	clear: both;
+}
+
+legend a {
+	color: #777;
+}
+
+
+/* 1059px and below */
+/* tablet view */
+/* @media only screen and (max-width: 1059px) {
+    .map { height: 450px; width: 95vw; }
+    .wrapper { flex-flow: column nowrap }
+} */
+
+/* 859px and below */
+/* transition view */
+/* @media only screen and (max-width: 859px) {
+    .mapboxgl-map { width: 100vw; }
+} */
+
+/* 500px and below */
+/* mobile view */
+/* @media only screen and (max-width: 500px) {
+    .wrapper { overflow-x: hidden }
+    .map { height: 350px; width: 95vw; }
+
+} */
+
+/* 600px and up */
+/* @media all and (min-width: 600px) {
+    .title { flex-flow: row nowrap; align-items: baseline; }
+} */
+
+/* 800px and up */
+/* @media all and (min-width: 800px) {
+    .main    { flex: 1 0px; margin-right: 10px; }
+} */
