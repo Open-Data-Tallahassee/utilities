@@ -6,3 +6,4 @@ map/public
 *map/.cache
 .DS_Store
 data/raw
+data/.DS_Store
