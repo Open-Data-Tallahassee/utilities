@@ -15,7 +15,7 @@ export const sources = {
     // },
     polygons: {
         type: 'geojson',
-        data: 'https://raw.githubusercontent.com/Open-Data-Tallahassee/utilities/dev/data/disconnected_09242021.geojson',
+        data: 'https://raw.githubusercontent.com/Open-Data-Tallahassee/utilities/main/data/clean/disconnections/05242021_10242021.geojson',
     },
 }
 
