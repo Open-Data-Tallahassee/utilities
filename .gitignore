@@ -7,3 +7,5 @@ map/public
 .DS_Store
 data/raw
 data/.DS_Store
+scripts/.ipynb_checkpoints/*
+scripts/.ipynb_checkpoints
