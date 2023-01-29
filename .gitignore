@@ -1,7 +1,5 @@
 *map/node_modules
 *map/package-lock.json
-*map/public/*
-*map/public
 map/public
 *map/.cache
 .DS_Store
