@@ -1,5 +1,5 @@
 # utilities
-tracking City of Tallahassee utilities, focusing on utility rates, bills, and energy efficiency
+tracking City of Tallahassee's utility disconnections
 
 ## questions:
 - does an uptick in utility disconnections impact displacement and vacancy?
